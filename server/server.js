@@ -1,47 +1,23 @@
-const mongoose=require('./db/mongoose');
+const express=require('express');
+const bodyParser=require('body-parser');
+var {mongoose}=require('../db/mongoose.js');
+var {ToDo}=require('../model/ToDo');
+var {User}=require('../model/User');
 
-mongoose.Promise=global.Promise;
-mongoose.connect('mongodb://localhost:27017/ToDoApp');
-
-var ToDo=mongoose.model('ToDo',{
-  text:{
-    type:String,
-    required:true,
-    minlength:1,
-    trim:true
-  },
-  completed:{
-    type:Boolean,
-    default:false
-  },
-  completedAt:{
-    type:Number,
-    default:null
-  }
+const app=express();
+app.use(bodyParser.json());
+app.post("/todos",(req,res)=>{
+//console.log(req.body);
+var todo=new ToDo({
+  text:req.body.text
 });
-
-var newToDo=new ToDo({
-  text:"Validators"
-});
-newToDo.save().then((doc)=>{
-  console.log("Save ToDo ",doc);
+todo.save().then((doc)=>{
+  res.status(200).send(doc);
 },(e)=>{
-  console.log("Error ",e);
+res.status(400).send(e);
+});
 });
 
-var user=mongoose.model('user',{
-  email:{
-    type:String,
-    required:true,
-    minlength:1,
-    trim:true
-  }
-});
-var newUser=new user({
-email:' ashusnp@gmail.com     '
-});
-newUser.save().then((doc)=>{
-console.log("Save user ",JSON.stringify(doc,undefined,2))
-},(e)=>{
-  console.log("eror ",e)
+app.listen(3000,()=>{
+  console.log('running on port ',3000);
 });
