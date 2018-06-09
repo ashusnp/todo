@@ -8,14 +8,22 @@ const app=express();
 app.use(bodyParser.json());
 app.post("/todos",(req,res)=>{
 //console.log(req.body);
-var todo=new ToDo({
-  text:req.body.text
+  var todo=new ToDo({
+      text:req.body.text
+  });
+  todo.save().then((doc)=>{
+      res.status(200).send(doc);
+    },(e)=>{
+      res.status(400).send(e);
+    });
 });
-todo.save().then((doc)=>{
-  res.status(200).send(doc);
-},(e)=>{
-res.status(400).send(e);
-});
+
+app.get('/todos',(req,res)=>{
+  ToDo.find().then((todos)=>{
+      res.send({todos})
+  },(e)=>{
+    res.status(400).send(e);
+  });
 });
 
 app.listen(3000,()=>{
