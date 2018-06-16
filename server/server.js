@@ -6,9 +6,29 @@ const {ObjectID}=require('mongodb');
 var {mongoose}=require('../db/mongoose.js');
 var {ToDo}=require('../model/ToDo');
 var {User}=require('../model/User');
+var {authenticate}=require('../middleware/authenticate');
 const port=process.env.PORT;
 const app=express();
 app.use(bodyParser.json());
+///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+app.post("/users",(req,res)=>{
+  var body=_.pick(req.body,['email','password']);
+  var user=new User(body);
+
+    user.save().then(()=>{
+    return user.generateAuthToken();
+  }).then((token)=>{
+    res.header('x-auth',token).send(user);
+  }).catch((e)=>{
+      res.status(400).send(e);
+    });
+});
+///////////////////////////////////////////////////////////////////////////////
+app.get('/users/me',authenticate,(req,res)=>{
+    res.send(req.user)
+});
 ///////////////////////////////////////////////////////////////////////////////
 app.post("/todos",(req,res)=>{
 
@@ -89,7 +109,7 @@ app.patch('/todo/:id',(req,res)=>{
         res.status(404).send('not found');
     })
 });
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 app.listen(port,()=>{
   console.log('running on port ',port);
 });
